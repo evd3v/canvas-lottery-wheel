@@ -1,0 +1,12 @@
+{
+  "name": "canvas-lottery-wheel",
+  "version": "1.0.0",
+  "description": "lottery wheel on canvas",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["lottery", "wheel", "canvas"],
+  "author": "evd3v",
+  "license": "ISC"
+}
