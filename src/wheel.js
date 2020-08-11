@@ -15,7 +15,6 @@ export class Wheel {
     this.sectors = options.sectors;
 
     this.#setup();
-    this.#render();
   }
 
   #render() {
@@ -34,10 +33,17 @@ export class Wheel {
   }
 
   #generateSectors() {
+    this.#mapSectors();
+    this.#renderLines();
+    this.#renderText();
+  }
+
+  #mapSectors() {
     this.sectors = this.sectors.map((item, index) => {
       const angleOffset = this.sectorStep * index;
       return {
         id: index,
+        text: item.text || item,
         startAngle: this.sectorStep * index,
         endAngle: this.sectorStep * (index + 1),
         x1: this.centerRadius * Math.cos(angleOffset) + this.center.x,
@@ -46,7 +52,9 @@ export class Wheel {
         y2: this.innerRadius * Math.sin(angleOffset) + this.center.y,
       };
     });
+  }
 
+  #renderLines() {
     this.sectors.forEach((item) => {
       this.$ctx.beginPath();
       this.$ctx.moveTo(item.x1, item.y1);
@@ -54,6 +62,27 @@ export class Wheel {
       this.$ctx.strokeStyle = "#1A173B";
       this.$ctx.lineTo(item.x2, item.y2);
       this.$ctx.stroke();
+    });
+  }
+
+  #renderText() {
+    this.sectors.forEach((item) => {
+      const offsetAngle =
+        (item.endAngle - item.startAngle) / 2 + item.startAngle;
+      const offsetRadius =
+        (this.centerRadius - this.innerRadius) / 2 + this.innerRadius;
+      //
+      this.$ctx.save();
+      this.$ctx.font = "24px serif";
+      this.$ctx.fillStyle = "#fff";
+      this.$ctx.translate(
+        this.center.x + offsetRadius * Math.cos(offsetAngle),
+        this.center.y + offsetRadius * Math.sin(offsetAngle)
+      );
+      this.$ctx.textAlign = "center";
+      this.$ctx.rotate(offsetAngle);
+      this.$ctx.fillText(item.text, 0, 0);
+      this.$ctx.restore();
     });
   }
 

@@ -151,9 +151,21 @@ var _setup = new WeakSet();
 
 var _generateSectors = new WeakSet();
 
+var _mapSectors = new WeakSet();
+
+var _renderLines = new WeakSet();
+
+var _renderText = new WeakSet();
+
 var Wheel = /*#__PURE__*/function () {
   function Wheel(selector, options) {
     _classCallCheck(this, Wheel);
+
+    _renderText.add(this);
+
+    _renderLines.add(this);
+
+    _mapSectors.add(this);
 
     _generateSectors.add(this);
 
@@ -196,8 +208,6 @@ var Wheel = /*#__PURE__*/function () {
     this.sectors = options.sectors;
 
     _classPrivateMethodGet(this, _setup, _setup2).call(this);
-
-    _classPrivateMethodGet(this, _render, _render2).call(this);
   }
 
   _createClass(Wheel, [{
@@ -309,12 +319,21 @@ var _setup2 = function _setup2() {
 };
 
 var _generateSectors2 = function _generateSectors2() {
+  _classPrivateMethodGet(this, _mapSectors, _mapSectors2).call(this);
+
+  _classPrivateMethodGet(this, _renderLines, _renderLines2).call(this);
+
+  _classPrivateMethodGet(this, _renderText, _renderText2).call(this);
+};
+
+var _mapSectors2 = function _mapSectors2() {
   var _this = this;
 
   this.sectors = this.sectors.map(function (item, index) {
     var angleOffset = _this.sectorStep * index;
     return {
       id: index,
+      text: item.text || item,
       startAngle: _this.sectorStep * index,
       endAngle: _this.sectorStep * (index + 1),
       x1: _this.centerRadius * Math.cos(angleOffset) + _this.center.x,
@@ -323,17 +342,46 @@ var _generateSectors2 = function _generateSectors2() {
       y2: _this.innerRadius * Math.sin(angleOffset) + _this.center.y
     };
   });
+};
+
+var _renderLines2 = function _renderLines2() {
+  var _this2 = this;
+
   this.sectors.forEach(function (item) {
-    _this.$ctx.beginPath();
+    _this2.$ctx.beginPath();
 
-    _this.$ctx.moveTo(item.x1, item.y1);
+    _this2.$ctx.moveTo(item.x1, item.y1);
 
-    _this.$ctx.lineWidth = _classPrivateFieldGet(_this, _SECTOR_BORDER_WIDTH);
-    _this.$ctx.strokeStyle = "#1A173B";
+    _this2.$ctx.lineWidth = _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH);
+    _this2.$ctx.strokeStyle = "#1A173B";
 
-    _this.$ctx.lineTo(item.x2, item.y2);
+    _this2.$ctx.lineTo(item.x2, item.y2);
 
-    _this.$ctx.stroke();
+    _this2.$ctx.stroke();
+  });
+};
+
+var _renderText2 = function _renderText2() {
+  var _this3 = this;
+
+  this.sectors.forEach(function (item) {
+    var offsetAngle = (item.endAngle - item.startAngle) / 2 + item.startAngle;
+    var offsetRadius = (_this3.centerRadius - _this3.innerRadius) / 2 + _this3.innerRadius; //
+
+    _this3.$ctx.save();
+
+    _this3.$ctx.font = "24px serif";
+    _this3.$ctx.fillStyle = "#fff";
+
+    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(offsetAngle), _this3.center.y + offsetRadius * Math.sin(offsetAngle));
+
+    _this3.$ctx.textAlign = "center";
+
+    _this3.$ctx.rotate(offsetAngle);
+
+    _this3.$ctx.fillText(item.text, 0, 0);
+
+    _this3.$ctx.restore();
   });
 };
 },{}],"../../../../../usr/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
@@ -447,7 +495,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37103" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33287" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
