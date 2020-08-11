@@ -195,7 +195,7 @@ var Wheel = /*#__PURE__*/function () {
 
     _SECTOR_BORDER_WIDTH.set(this, {
       writable: true,
-      value: 2
+      value: 3
     });
 
     if (!options.sectors) {
@@ -255,6 +255,19 @@ var Wheel = /*#__PURE__*/function () {
       this.$ctx.stroke();
     }
   }, {
+    key: "drawTriangle",
+    value: function drawTriangle() {
+      this.$ctx.beginPath();
+      var startX = this.center.x + this.innerRadius;
+      var startY = this.center.y;
+      this.$ctx.moveTo(startX + 20, startY - 20);
+      this.$ctx.lineTo(startX + 20, startY + 20);
+      this.$ctx.lineTo(startX - 20, startY);
+      this.$ctx.closePath();
+      this.$ctx.fillStyle = "#fff";
+      this.$ctx.fill();
+    }
+  }, {
     key: "sectorStep",
     get: function get() {
       return 2 * Math.PI / this.sectors.length;
@@ -309,6 +322,8 @@ var _render2 = function _render2() {
   this.drawCenterArk();
 
   _classPrivateMethodGet(this, _generateSectors, _generateSectors2).call(this);
+
+  this.drawTriangle();
 };
 
 var _setup2 = function _setup2() {
@@ -330,16 +345,17 @@ var _mapSectors2 = function _mapSectors2() {
   var _this = this;
 
   this.sectors = this.sectors.map(function (item, index) {
-    var angleOffset = _this.sectorStep * index;
+    var offsetAngle = (_this.sectorStep * (index + 1) - _this.sectorStep * index) / 2 + _this.sectorStep * index;
     return {
       id: index,
+      offsetAngle: offsetAngle,
       text: item.text || item,
       startAngle: _this.sectorStep * index,
       endAngle: _this.sectorStep * (index + 1),
-      x1: _this.centerRadius * Math.cos(angleOffset) + _this.center.x,
-      y1: _this.centerRadius * Math.sin(angleOffset) + _this.center.y,
-      x2: _this.innerRadius * Math.cos(angleOffset) + _this.center.x,
-      y2: _this.innerRadius * Math.sin(angleOffset) + _this.center.y
+      x1: _this.centerRadius * Math.cos(offsetAngle) + _this.center.x,
+      y1: _this.centerRadius * Math.sin(offsetAngle) + _this.center.y,
+      x2: _this.innerRadius * Math.cos(offsetAngle) + _this.center.x,
+      y2: _this.innerRadius * Math.sin(offsetAngle) + _this.center.y
     };
   });
 };
@@ -365,19 +381,21 @@ var _renderText2 = function _renderText2() {
   var _this3 = this;
 
   this.sectors.forEach(function (item) {
-    var offsetAngle = (item.endAngle - item.startAngle) / 2 + item.startAngle;
-    var offsetRadius = (_this3.centerRadius - _this3.innerRadius) / 2 + _this3.innerRadius; //
+    var textRotateAngle = 0.03; // based on text height
+
+    var halfSectorAngle = (item.endAngle - item.startAngle) / 2 - textRotateAngle;
+    var offsetRadius = (_this3.centerRadius - _this3.innerRadius) / 2 + _this3.innerRadius;
 
     _this3.$ctx.save();
 
     _this3.$ctx.font = "24px serif";
     _this3.$ctx.fillStyle = "#fff";
 
-    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(offsetAngle), _this3.center.y + offsetRadius * Math.sin(offsetAngle));
+    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle), _this3.center.y + offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle));
 
     _this3.$ctx.textAlign = "center";
 
-    _this3.$ctx.rotate(offsetAngle);
+    _this3.$ctx.rotate(item.offsetAngle - halfSectorAngle);
 
     _this3.$ctx.fillText(item.text, 0, 0);
 
@@ -464,7 +482,7 @@ var _wheel = require("./src/wheel");
 require("./src/styles.scss");
 
 var wheel = new _wheel.Wheel("#canvas-container", {
-  sectors: ["one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five"]
+  sectors: ["one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five"]
 });
 window.s = wheel;
 },{"./src/wheel":"../src/wheel.js","./src/styles.scss":"../src/styles.scss"}],"../../../../../usr/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {

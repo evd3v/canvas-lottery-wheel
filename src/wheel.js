@@ -3,7 +3,7 @@ export class Wheel {
   #INSIDE_GAP = 35;
   #INSIDE_STROKE_WIDTH = 10;
   #CENTER_STROKE_WIDTH = 10;
-  #SECTOR_BORDER_WIDTH = 2;
+  #SECTOR_BORDER_WIDTH = 3;
 
   constructor(selector, options) {
     if (!options.sectors) {
@@ -22,6 +22,7 @@ export class Wheel {
     this.drawInnerArk();
     this.drawCenterArk();
     this.#generateSectors();
+    this.drawTriangle();
   }
 
   #setup() {
@@ -40,16 +41,19 @@ export class Wheel {
 
   #mapSectors() {
     this.sectors = this.sectors.map((item, index) => {
-      const angleOffset = this.sectorStep * index;
+      const offsetAngle =
+        (this.sectorStep * (index + 1) - this.sectorStep * index) / 2 +
+        this.sectorStep * index;
       return {
         id: index,
+        offsetAngle,
         text: item.text || item,
         startAngle: this.sectorStep * index,
         endAngle: this.sectorStep * (index + 1),
-        x1: this.centerRadius * Math.cos(angleOffset) + this.center.x,
-        y1: this.centerRadius * Math.sin(angleOffset) + this.center.y,
-        x2: this.innerRadius * Math.cos(angleOffset) + this.center.x,
-        y2: this.innerRadius * Math.sin(angleOffset) + this.center.y,
+        x1: this.centerRadius * Math.cos(offsetAngle) + this.center.x,
+        y1: this.centerRadius * Math.sin(offsetAngle) + this.center.y,
+        x2: this.innerRadius * Math.cos(offsetAngle) + this.center.x,
+        y2: this.innerRadius * Math.sin(offsetAngle) + this.center.y,
       };
     });
   }
@@ -67,20 +71,23 @@ export class Wheel {
 
   #renderText() {
     this.sectors.forEach((item) => {
-      const offsetAngle =
-        (item.endAngle - item.startAngle) / 2 + item.startAngle;
+      const textRotateAngle = 0.03; // based on text height
+
+      const halfSectorAngle =
+        (item.endAngle - item.startAngle) / 2 - textRotateAngle;
       const offsetRadius =
         (this.centerRadius - this.innerRadius) / 2 + this.innerRadius;
-      //
       this.$ctx.save();
       this.$ctx.font = "24px serif";
       this.$ctx.fillStyle = "#fff";
       this.$ctx.translate(
-        this.center.x + offsetRadius * Math.cos(offsetAngle),
-        this.center.y + offsetRadius * Math.sin(offsetAngle)
+        this.center.x +
+          offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle),
+        this.center.y +
+          offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle)
       );
       this.$ctx.textAlign = "center";
-      this.$ctx.rotate(offsetAngle);
+      this.$ctx.rotate(item.offsetAngle - halfSectorAngle);
       this.$ctx.fillText(item.text, 0, 0);
       this.$ctx.restore();
     });
@@ -181,5 +188,18 @@ export class Wheel {
     this.$ctx.lineWidth = this.#CENTER_STROKE_WIDTH;
     this.$ctx.strokeStyle = "#1A173B";
     this.$ctx.stroke();
+  }
+
+  drawTriangle() {
+    this.$ctx.beginPath();
+    const startX = this.center.x + this.innerRadius;
+    const startY = this.center.y;
+    this.$ctx.moveTo(startX + 20, startY - 20);
+    this.$ctx.lineTo(startX + 20, startY + 20);
+    this.$ctx.lineTo(startX - 20, startY);
+    this.$ctx.closePath();
+
+    this.$ctx.fillStyle = "#fff";
+    this.$ctx.fill();
   }
 }
