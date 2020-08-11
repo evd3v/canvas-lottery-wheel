@@ -131,6 +131,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
@@ -144,6 +146,8 @@ var _INSIDE_STROKE_WIDTH = new WeakMap();
 var _CENTER_STROKE_WIDTH = new WeakMap();
 
 var _SECTOR_BORDER_WIDTH = new WeakMap();
+
+var _SPIN_ANGLE = new WeakMap();
 
 var _CURRENT_ROTATION_ANGLE = new WeakMap();
 
@@ -200,6 +204,11 @@ var Wheel = /*#__PURE__*/function () {
       value: 3
     });
 
+    _SPIN_ANGLE.set(this, {
+      writable: true,
+      value: Math.PI / 30
+    });
+
     _CURRENT_ROTATION_ANGLE.set(this, {
       writable: true,
       value: 0
@@ -218,6 +227,19 @@ var Wheel = /*#__PURE__*/function () {
   }
 
   _createClass(Wheel, [{
+    key: "rotate",
+    value: function rotate() {
+      var _this = this;
+
+      setInterval(function () {
+        _classPrivateFieldSet(_this, _CURRENT_ROTATION_ANGLE, _classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE) + _classPrivateFieldGet(_this, _SPIN_ANGLE));
+
+        console.log(_classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE));
+
+        _classPrivateMethodGet(_this, _render, _render2).call(_this);
+      }, 30);
+    }
+  }, {
     key: "resizeHandler",
     value: function resizeHandler() {
       this.rootSize = {
@@ -320,6 +342,8 @@ var Wheel = /*#__PURE__*/function () {
       this.$canvas.width = size.width;
 
       _classPrivateMethodGet(this, _render, _render2).call(this);
+
+      this.rotate();
     }
   }]);
 
@@ -354,68 +378,68 @@ var _generateSectors2 = function _generateSectors2() {
 };
 
 var _mapSectors2 = function _mapSectors2() {
-  var _this = this;
+  var _this2 = this;
 
   this.sectors = this.sectors.map(function (item, index) {
-    var offsetAngle = (_this.sectorStep * (index + 1) - _this.sectorStep * index) / 2 + _this.sectorStep * index;
+    var offsetAngle = (_this2.sectorStep * (index + 1) - _this2.sectorStep * index) / 2 + _this2.sectorStep * index;
     return {
       id: index,
       offsetAngle: offsetAngle,
       text: item.text || item,
-      startAngle: _this.sectorStep * index,
-      endAngle: _this.sectorStep * (index + 1),
-      x1: _this.centerRadius * Math.cos(offsetAngle) + _this.center.x,
-      y1: _this.centerRadius * Math.sin(offsetAngle) + _this.center.y,
-      x2: _this.innerRadius * Math.cos(offsetAngle) + _this.center.x,
-      y2: _this.innerRadius * Math.sin(offsetAngle) + _this.center.y
+      startAngle: _this2.sectorStep * index,
+      endAngle: _this2.sectorStep * (index + 1),
+      x1: _this2.centerRadius * Math.cos(offsetAngle) + _this2.center.x,
+      y1: _this2.centerRadius * Math.sin(offsetAngle) + _this2.center.y,
+      x2: _this2.innerRadius * Math.cos(offsetAngle) + _this2.center.x,
+      y2: _this2.innerRadius * Math.sin(offsetAngle) + _this2.center.y
     };
   });
 };
 
 var _renderSectors2 = function _renderSectors2() {
-  var _this2 = this;
+  var _this3 = this;
 
   this.$ctx.lineWidth = _classPrivateFieldGet(this, _SECTOR_BORDER_WIDTH);
   this.sectors.forEach(function (item) {
-    _this2.$ctx.beginPath();
+    _this3.$ctx.beginPath();
 
-    _this2.$ctx.fillStyle = item.id % 2 === 0 ? "#990066" : "#6633CC";
+    _this3.$ctx.fillStyle = item.id % 2 === 0 ? "#990066" : "#6633CC";
 
-    _this2.$ctx.arc(_this2.center.x, _this2.center.y, _this2.innerRadius, item.startAngle + _this2.rotateAngle + 2 * _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH) / (Math.PI * _this2.innerRadius), item.endAngle + _this2.rotateAngle, false);
+    _this3.$ctx.arc(_this3.center.x, _this3.center.y, _this3.innerRadius, item.startAngle + _this3.rotateAngle + 2 * _classPrivateFieldGet(_this3, _SECTOR_BORDER_WIDTH) / (Math.PI * _this3.innerRadius), item.endAngle + _this3.rotateAngle, false);
 
-    _this2.$ctx.arc(_this2.center.x, _this2.center.y, _this2.centerRadius, item.endAngle + _this2.rotateAngle, item.startAngle + 2 * _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH) / (Math.PI * _this2.centerRadius) + _this2.rotateAngle, true);
+    _this3.$ctx.arc(_this3.center.x, _this3.center.y, _this3.centerRadius, item.endAngle + _this3.rotateAngle, item.startAngle + 2 * _classPrivateFieldGet(_this3, _SECTOR_BORDER_WIDTH) / (Math.PI * _this3.centerRadius) + _this3.rotateAngle, true);
 
-    _this2.$ctx.stroke();
+    _this3.$ctx.stroke();
 
-    _this2.$ctx.fill();
+    _this3.$ctx.fill();
 
-    _this2.$ctx.save();
+    _this3.$ctx.save();
   });
 };
 
 var _renderText2 = function _renderText2() {
-  var _this3 = this;
+  var _this4 = this;
 
   this.sectors.forEach(function (item) {
     var textRotateAngle = 0.03; // based on text height
 
     var halfSectorAngle = (item.endAngle - item.startAngle) / 2 - textRotateAngle;
-    var offsetRadius = (_this3.centerRadius - _this3.innerRadius) / 2 + _this3.innerRadius;
+    var offsetRadius = (_this4.centerRadius - _this4.innerRadius) / 2 + _this4.innerRadius;
 
-    _this3.$ctx.save();
+    _this4.$ctx.save();
 
-    _this3.$ctx.font = "24px serif";
-    _this3.$ctx.fillStyle = "#fff";
+    _this4.$ctx.font = "24px serif";
+    _this4.$ctx.fillStyle = "#fff";
 
-    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE)), _this3.center.y + offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE)));
+    _this4.$ctx.translate(_this4.center.x + offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this4, _CURRENT_ROTATION_ANGLE)), _this4.center.y + offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this4, _CURRENT_ROTATION_ANGLE)));
 
-    _this3.$ctx.textAlign = "center";
+    _this4.$ctx.textAlign = "center";
 
-    _this3.$ctx.rotate(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE));
+    _this4.$ctx.rotate(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this4, _CURRENT_ROTATION_ANGLE));
 
-    _this3.$ctx.fillText(item.text, 0, 0);
+    _this4.$ctx.fillText(item.text, 0, 0);
 
-    _this3.$ctx.restore();
+    _this4.$ctx.restore();
   });
 };
 },{}],"../../../../../usr/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
@@ -529,7 +553,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41085" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37803" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

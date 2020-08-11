@@ -4,6 +4,7 @@ export class Wheel {
   #INSIDE_STROKE_WIDTH = 10;
   #CENTER_STROKE_WIDTH = 10;
   #SECTOR_BORDER_WIDTH = 3;
+  #SPIN_ANGLE = Math.PI / 30;
 
   #CURRENT_ROTATION_ANGLE = 0;
 
@@ -124,6 +125,14 @@ export class Wheel {
     });
   }
 
+  rotate() {
+    setInterval(() => {
+      this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
+      console.log(this.#CURRENT_ROTATION_ANGLE);
+      this.#render();
+    }, 30);
+  }
+
   get rotateAngle() {
     return (
       this.sectorStep +
@@ -170,6 +179,7 @@ export class Wheel {
     this.$canvas.height = size.height;
     this.$canvas.width = size.width;
     this.#render();
+    this.rotate();
   }
 
   resizeHandler() {
