@@ -5,6 +5,8 @@ export class Wheel {
   #CENTER_STROKE_WIDTH = 10;
   #SECTOR_BORDER_WIDTH = 3;
 
+  #CURRENT_ROTATION_ANGLE = 0;
+
   constructor(selector, options) {
     if (!options.sectors) {
       throw new Error("there are no sectors!");
@@ -35,7 +37,7 @@ export class Wheel {
 
   #generateSectors() {
     this.#mapSectors();
-    this.#renderLines();
+    this.#renderSectors();
     this.#renderText();
   }
 
@@ -58,14 +60,35 @@ export class Wheel {
     });
   }
 
-  #renderLines() {
+  #renderSectors() {
+    this.$ctx.lineWidth = this.#SECTOR_BORDER_WIDTH;
     this.sectors.forEach((item) => {
       this.$ctx.beginPath();
-      this.$ctx.moveTo(item.x1, item.y1);
-      this.$ctx.lineWidth = this.#SECTOR_BORDER_WIDTH;
-      this.$ctx.strokeStyle = "#1A173B";
-      this.$ctx.lineTo(item.x2, item.y2);
+      this.$ctx.fillStyle = item.id % 2 === 0 ? "#990066" : "#6633CC";
+
+      this.$ctx.arc(
+        this.center.x,
+        this.center.y,
+        this.innerRadius,
+        item.startAngle +
+          this.rotateAngle +
+          (2 * this.#SECTOR_BORDER_WIDTH) / (Math.PI * this.innerRadius),
+        item.endAngle + this.rotateAngle,
+        false
+      );
+      this.$ctx.arc(
+        this.center.x,
+        this.center.y,
+        this.centerRadius,
+        item.endAngle + this.rotateAngle,
+        item.startAngle +
+          (2 * this.#SECTOR_BORDER_WIDTH) / (Math.PI * this.centerRadius) +
+          this.rotateAngle,
+        true
+      );
       this.$ctx.stroke();
+      this.$ctx.fill();
+      this.$ctx.save();
     });
   }
 
@@ -82,15 +105,31 @@ export class Wheel {
       this.$ctx.fillStyle = "#fff";
       this.$ctx.translate(
         this.center.x +
-          offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle),
+          offsetRadius *
+            Math.cos(
+              item.offsetAngle - halfSectorAngle + this.#CURRENT_ROTATION_ANGLE
+            ),
         this.center.y +
-          offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle)
+          offsetRadius *
+            Math.sin(
+              item.offsetAngle - halfSectorAngle + this.#CURRENT_ROTATION_ANGLE
+            )
       );
       this.$ctx.textAlign = "center";
-      this.$ctx.rotate(item.offsetAngle - halfSectorAngle);
+      this.$ctx.rotate(
+        item.offsetAngle - halfSectorAngle + this.#CURRENT_ROTATION_ANGLE
+      );
       this.$ctx.fillText(item.text, 0, 0);
       this.$ctx.restore();
     });
+  }
+
+  get rotateAngle() {
+    return (
+      this.sectorStep +
+      Math.PI / this.sectors.length +
+      this.#CURRENT_ROTATION_ANGLE
+    );
   }
 
   get sectorStep() {
@@ -155,7 +194,7 @@ export class Wheel {
 
   drawOuterArk() {
     this.$ctx.beginPath();
-    this.$ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+    this.$ctx.arc(this.center.x, this.center.y, this.radius, 0.05, Math.PI * 2);
     this.$ctx.fillStyle = this.createOuterGradient();
     this.$ctx.fill();
   }

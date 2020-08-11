@@ -145,6 +145,8 @@ var _CENTER_STROKE_WIDTH = new WeakMap();
 
 var _SECTOR_BORDER_WIDTH = new WeakMap();
 
+var _CURRENT_ROTATION_ANGLE = new WeakMap();
+
 var _render = new WeakSet();
 
 var _setup = new WeakSet();
@@ -153,7 +155,7 @@ var _generateSectors = new WeakSet();
 
 var _mapSectors = new WeakSet();
 
-var _renderLines = new WeakSet();
+var _renderSectors = new WeakSet();
 
 var _renderText = new WeakSet();
 
@@ -163,7 +165,7 @@ var Wheel = /*#__PURE__*/function () {
 
     _renderText.add(this);
 
-    _renderLines.add(this);
+    _renderSectors.add(this);
 
     _mapSectors.add(this);
 
@@ -198,6 +200,11 @@ var Wheel = /*#__PURE__*/function () {
       value: 3
     });
 
+    _CURRENT_ROTATION_ANGLE.set(this, {
+      writable: true,
+      value: 0
+    });
+
     if (!options.sectors) {
       throw new Error("there are no sectors!");
     }
@@ -230,7 +237,7 @@ var Wheel = /*#__PURE__*/function () {
     key: "drawOuterArk",
     value: function drawOuterArk() {
       this.$ctx.beginPath();
-      this.$ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+      this.$ctx.arc(this.center.x, this.center.y, this.radius, 0.05, Math.PI * 2);
       this.$ctx.fillStyle = this.createOuterGradient();
       this.$ctx.fill();
     }
@@ -266,6 +273,11 @@ var Wheel = /*#__PURE__*/function () {
       this.$ctx.closePath();
       this.$ctx.fillStyle = "#fff";
       this.$ctx.fill();
+    }
+  }, {
+    key: "rotateAngle",
+    get: function get() {
+      return this.sectorStep + Math.PI / this.sectors.length + _classPrivateFieldGet(this, _CURRENT_ROTATION_ANGLE);
     }
   }, {
     key: "sectorStep",
@@ -336,7 +348,7 @@ var _setup2 = function _setup2() {
 var _generateSectors2 = function _generateSectors2() {
   _classPrivateMethodGet(this, _mapSectors, _mapSectors2).call(this);
 
-  _classPrivateMethodGet(this, _renderLines, _renderLines2).call(this);
+  _classPrivateMethodGet(this, _renderSectors, _renderSectors2).call(this);
 
   _classPrivateMethodGet(this, _renderText, _renderText2).call(this);
 };
@@ -360,20 +372,24 @@ var _mapSectors2 = function _mapSectors2() {
   });
 };
 
-var _renderLines2 = function _renderLines2() {
+var _renderSectors2 = function _renderSectors2() {
   var _this2 = this;
 
+  this.$ctx.lineWidth = _classPrivateFieldGet(this, _SECTOR_BORDER_WIDTH);
   this.sectors.forEach(function (item) {
     _this2.$ctx.beginPath();
 
-    _this2.$ctx.moveTo(item.x1, item.y1);
+    _this2.$ctx.fillStyle = item.id % 2 === 0 ? "#990066" : "#6633CC";
 
-    _this2.$ctx.lineWidth = _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH);
-    _this2.$ctx.strokeStyle = "#1A173B";
+    _this2.$ctx.arc(_this2.center.x, _this2.center.y, _this2.innerRadius, item.startAngle + _this2.rotateAngle + 2 * _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH) / (Math.PI * _this2.innerRadius), item.endAngle + _this2.rotateAngle, false);
 
-    _this2.$ctx.lineTo(item.x2, item.y2);
+    _this2.$ctx.arc(_this2.center.x, _this2.center.y, _this2.centerRadius, item.endAngle + _this2.rotateAngle, item.startAngle + 2 * _classPrivateFieldGet(_this2, _SECTOR_BORDER_WIDTH) / (Math.PI * _this2.centerRadius) + _this2.rotateAngle, true);
 
     _this2.$ctx.stroke();
+
+    _this2.$ctx.fill();
+
+    _this2.$ctx.save();
   });
 };
 
@@ -391,11 +407,11 @@ var _renderText2 = function _renderText2() {
     _this3.$ctx.font = "24px serif";
     _this3.$ctx.fillStyle = "#fff";
 
-    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle), _this3.center.y + offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle));
+    _this3.$ctx.translate(_this3.center.x + offsetRadius * Math.cos(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE)), _this3.center.y + offsetRadius * Math.sin(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE)));
 
     _this3.$ctx.textAlign = "center";
 
-    _this3.$ctx.rotate(item.offsetAngle - halfSectorAngle);
+    _this3.$ctx.rotate(item.offsetAngle - halfSectorAngle + _classPrivateFieldGet(_this3, _CURRENT_ROTATION_ANGLE));
 
     _this3.$ctx.fillText(item.text, 0, 0);
 
@@ -513,7 +529,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33287" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41085" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
