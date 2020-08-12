@@ -4,9 +4,11 @@ export class Wheel {
   #INSIDE_STROKE_WIDTH = 10;
   #CENTER_STROKE_WIDTH = 10;
   #SECTOR_BORDER_WIDTH = 3;
-  #SPIN_ANGLE = Math.PI / 30;
+  #SPIN_ANGLE = Math.PI / 25;
+  #BASE_STOP_ROUND = 3;
 
   #CURRENT_ROTATION_ANGLE = 0;
+  #CURRENT_ROUND = 0;
 
   constructor(selector, options) {
     if (!options.sectors) {
@@ -16,6 +18,7 @@ export class Wheel {
     this.$canvas = document.createElement("canvas");
     this.$ctx = this.$canvas.getContext("2d");
     this.sectors = options.sectors;
+    this.rotationInterval = null;
 
     this.#setup();
   }
@@ -126,11 +129,45 @@ export class Wheel {
   }
 
   rotate() {
-    setInterval(() => {
-      this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
-      console.log(this.#CURRENT_ROTATION_ANGLE);
+    const randomSectors = Math.floor(
+      Math.random() * this.sectors.length + this.sectors.length / 2
+    );
+
+    const randomAngle = randomSectors * this.sectorStep;
+    const stopRound =
+      Math.floor(randomAngle / (Math.PI * 2)) + this.#BASE_STOP_ROUND;
+
+    clearInterval(this.rotationInterval);
+    this.rotationInterval = setInterval(() => {
+      if (this.#CURRENT_ROTATION_ANGLE > 2 * Math.PI) {
+        this.#CURRENT_ROTATION_ANGLE =
+          2 * Math.PI - this.#CURRENT_ROTATION_ANGLE + this.#SPIN_ANGLE;
+        this.#CURRENT_ROUND += 1;
+      } else {
+        this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
+      }
+
+      if (this.#CURRENT_ROUND >= this.#BASE_STOP_ROUND) {
+        this.stop(randomAngle, stopRound);
+      } else {
+        this.#SPIN_ANGLE =
+          this.#SPIN_ANGLE > 0.05 ? this.#SPIN_ANGLE * 0.99 : this.#SPIN_ANGLE;
+      }
+
       this.#render();
-    }, 30);
+    }, 24);
+  }
+
+  stop(angle, round) {
+    this.#SPIN_ANGLE = this.#SPIN_ANGLE * (1 - (this.#SPIN_ANGLE / 24) * angle);
+
+    if (
+      this.#CURRENT_ROUND === round &&
+      this.#CURRENT_ROTATION_ANGLE.toFixed(1) ===
+        (angle % (Math.PI * 2)).toFixed(1)
+    ) {
+      clearInterval(this.rotationInterval);
+    }
   }
 
   get rotateAngle() {

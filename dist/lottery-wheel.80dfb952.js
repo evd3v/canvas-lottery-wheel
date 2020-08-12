@@ -149,7 +149,11 @@ var _SECTOR_BORDER_WIDTH = new WeakMap();
 
 var _SPIN_ANGLE = new WeakMap();
 
+var _BASE_STOP_ROUND = new WeakMap();
+
 var _CURRENT_ROTATION_ANGLE = new WeakMap();
+
+var _CURRENT_ROUND = new WeakMap();
 
 var _render = new WeakSet();
 
@@ -206,10 +210,20 @@ var Wheel = /*#__PURE__*/function () {
 
     _SPIN_ANGLE.set(this, {
       writable: true,
-      value: Math.PI / 30
+      value: Math.PI / 25
+    });
+
+    _BASE_STOP_ROUND.set(this, {
+      writable: true,
+      value: 3
     });
 
     _CURRENT_ROTATION_ANGLE.set(this, {
+      writable: true,
+      value: 0
+    });
+
+    _CURRENT_ROUND.set(this, {
       writable: true,
       value: 0
     });
@@ -222,6 +236,7 @@ var Wheel = /*#__PURE__*/function () {
     this.$canvas = document.createElement("canvas");
     this.$ctx = this.$canvas.getContext("2d");
     this.sectors = options.sectors;
+    this.rotationInterval = null;
 
     _classPrivateMethodGet(this, _setup, _setup2).call(this);
   }
@@ -231,13 +246,38 @@ var Wheel = /*#__PURE__*/function () {
     value: function rotate() {
       var _this = this;
 
-      setInterval(function () {
-        _classPrivateFieldSet(_this, _CURRENT_ROTATION_ANGLE, _classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE) + _classPrivateFieldGet(_this, _SPIN_ANGLE));
+      var randomSectors = Math.floor(Math.random() * this.sectors.length + this.sectors.length / 2);
+      var randomAngle = randomSectors * this.sectorStep;
 
-        console.log(_classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE));
+      var stopRound = Math.floor(randomAngle / (Math.PI * 2)) + _classPrivateFieldGet(this, _BASE_STOP_ROUND);
+
+      clearInterval(this.rotationInterval);
+      this.rotationInterval = setInterval(function () {
+        if (_classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE) > 2 * Math.PI) {
+          _classPrivateFieldSet(_this, _CURRENT_ROTATION_ANGLE, 2 * Math.PI - _classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE) + _classPrivateFieldGet(_this, _SPIN_ANGLE));
+
+          _classPrivateFieldSet(_this, _CURRENT_ROUND, _classPrivateFieldGet(_this, _CURRENT_ROUND) + 1);
+        } else {
+          _classPrivateFieldSet(_this, _CURRENT_ROTATION_ANGLE, _classPrivateFieldGet(_this, _CURRENT_ROTATION_ANGLE) + _classPrivateFieldGet(_this, _SPIN_ANGLE));
+        }
+
+        if (_classPrivateFieldGet(_this, _CURRENT_ROUND) >= _classPrivateFieldGet(_this, _BASE_STOP_ROUND)) {
+          _this.stop(randomAngle, stopRound);
+        } else {
+          _classPrivateFieldSet(_this, _SPIN_ANGLE, _classPrivateFieldGet(_this, _SPIN_ANGLE) > 0.05 ? _classPrivateFieldGet(_this, _SPIN_ANGLE) * 0.99 : _classPrivateFieldGet(_this, _SPIN_ANGLE));
+        }
 
         _classPrivateMethodGet(_this, _render, _render2).call(_this);
-      }, 30);
+      }, 24);
+    }
+  }, {
+    key: "stop",
+    value: function stop(angle, round) {
+      _classPrivateFieldSet(this, _SPIN_ANGLE, _classPrivateFieldGet(this, _SPIN_ANGLE) * (1 - _classPrivateFieldGet(this, _SPIN_ANGLE) / 24 * angle));
+
+      if (_classPrivateFieldGet(this, _CURRENT_ROUND) === round && _classPrivateFieldGet(this, _CURRENT_ROTATION_ANGLE).toFixed(1) === (angle % (Math.PI * 2)).toFixed(1)) {
+        clearInterval(this.rotationInterval);
+      }
     }
   }, {
     key: "resizeHandler",
@@ -522,7 +562,7 @@ var _wheel = require("./src/wheel");
 require("./src/styles.scss");
 
 var wheel = new _wheel.Wheel("#canvas-container", {
-  sectors: ["one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five"]
+  sectors: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50"]
 });
 window.s = wheel;
 },{"./src/wheel":"../src/wheel.js","./src/styles.scss":"../src/styles.scss"}],"../../../../../usr/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -553,7 +593,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37803" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43071" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
