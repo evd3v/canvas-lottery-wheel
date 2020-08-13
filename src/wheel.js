@@ -6,6 +6,8 @@ export class Wheel {
   #SECTOR_BORDER_WIDTH = 3;
   #SPIN_ANGLE = Math.PI / 25;
   #BASE_STOP_ROUND = 3;
+  #ROTATION_TIME = 10;
+  #ANGLE_CONST = 5.608;
 
   #CURRENT_ROTATION_ANGLE = 0;
   #CURRENT_ROUND = 0;
@@ -132,42 +134,28 @@ export class Wheel {
     const randomSectors = Math.floor(
       Math.random() * this.sectors.length + this.sectors.length / 2
     );
-
     const randomAngle = randomSectors * this.sectorStep;
-    const stopRound =
-      Math.floor(randomAngle / (Math.PI * 2)) + this.#BASE_STOP_ROUND;
+
+    let i = 1;
+    console.log(
+      "toSector",
+      this.sectors.length - (randomSectors % this.sectors.length) + 1
+    );
 
     clearInterval(this.rotationInterval);
     this.rotationInterval = setInterval(() => {
-      if (this.#CURRENT_ROTATION_ANGLE > 2 * Math.PI) {
-        this.#CURRENT_ROTATION_ANGLE =
-          2 * Math.PI - this.#CURRENT_ROTATION_ANGLE + this.#SPIN_ANGLE;
-        this.#CURRENT_ROUND += 1;
-      } else {
-        this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
+      if (this.#SPIN_ANGLE.toFixed(3) === "0.000") {
+        clearInterval(this.rotationInterval);
       }
+      this.#SPIN_ANGLE =
+        (randomAngle / i -
+          randomAngle / Math.floor(this.#ROTATION_TIME * (1000 / 24))) /
+        this.#ANGLE_CONST;
+      this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
 
-      if (this.#CURRENT_ROUND >= this.#BASE_STOP_ROUND) {
-        this.stop(randomAngle, stopRound);
-      } else {
-        this.#SPIN_ANGLE =
-          this.#SPIN_ANGLE > 0.05 ? this.#SPIN_ANGLE * 0.99 : this.#SPIN_ANGLE;
-      }
-
+      i++;
       this.#render();
     }, 24);
-  }
-
-  stop(angle, round) {
-    this.#SPIN_ANGLE = this.#SPIN_ANGLE * (1 - (this.#SPIN_ANGLE / 24) * angle);
-
-    if (
-      this.#CURRENT_ROUND === round &&
-      this.#CURRENT_ROTATION_ANGLE.toFixed(1) ===
-        (angle % (Math.PI * 2)).toFixed(1)
-    ) {
-      clearInterval(this.rotationInterval);
-    }
   }
 
   get rotateAngle() {
