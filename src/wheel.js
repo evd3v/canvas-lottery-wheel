@@ -130,28 +130,35 @@ export class Wheel {
     });
   }
 
-  rotate() {
-    const randomSectors = Math.floor(
-      Math.random() * this.sectors.length + this.sectors.length / 2
-    );
-    const randomAngle = randomSectors * this.sectorStep;
+  rotate(sector) {
+    this.#CURRENT_ROTATION_ANGLE = this.#CURRENT_ROTATION_ANGLE % (Math.PI * 2);
+    console.log(this.#CURRENT_ROTATION_ANGLE % (Math.PI * 2));
+
+    this.#SPIN_ANGLE = Math.PI / 25;
+
+    const randomSectors = sector;
+    const randomAngle =
+      -1 * ((sector % this.sectors.length) - 1) * this.sectorStep -
+      Math.PI * 6 -
+      this.#CURRENT_ROTATION_ANGLE;
+
+    console.log("hello");
 
     let i = 1;
-    console.log(
-      "toSector",
-      this.sectors.length - (randomSectors % this.sectors.length) + 1
-    );
+    console.log("toSector", randomSectors);
 
-    clearInterval(this.rotationInterval);
     this.rotationInterval = setInterval(() => {
       if (this.#SPIN_ANGLE.toFixed(3) === "0.000") {
         clearInterval(this.rotationInterval);
       }
+      console.log("hello from interval", this.rotationInterval);
       this.#SPIN_ANGLE =
         (randomAngle / i -
           randomAngle / Math.floor(this.#ROTATION_TIME * (1000 / 24))) /
         this.#ANGLE_CONST;
+
       this.#CURRENT_ROTATION_ANGLE += this.#SPIN_ANGLE;
+      console.log(this.#CURRENT_ROTATION_ANGLE);
 
       i++;
       this.#render();
@@ -204,7 +211,6 @@ export class Wheel {
     this.$canvas.height = size.height;
     this.$canvas.width = size.width;
     this.#render();
-    this.rotate();
   }
 
   resizeHandler() {
