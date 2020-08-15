@@ -1,5 +1,5 @@
-import { Wheel } from "./src/wheel";
-import "./src/styles.scss";
+import { Wheel } from "../dist/bundle.4171bf99a1b2a61a40d0";
+import "@/styles.scss";
 
 const sectors = [
   "1",

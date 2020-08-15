@@ -1,3 +1,5 @@
+import "./styles.scss";
+
 export class Wheel {
   #OFFSET_GAP = 10;
   #INSIDE_GAP = 35;
